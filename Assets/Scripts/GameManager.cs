@@ -17,13 +17,14 @@ namespace WayOfLife
         [SerializeField] private ThreeOptionsToggle probToggle;
         [SerializeField] private InfoText text;
         [SerializeField] private GameGrid grid;
-
         [SerializeField] private OptionsScriptableObject options;
         private bool gameActive;
         private int generation = 1;
         private int aliveCounter;
         private int timeConversionConstant = 1_000;
         private WaitForSeconds waitForSeconds;
+        private Coroutine coroutine;
+
 
         void Start()
         {
@@ -64,7 +65,15 @@ namespace WayOfLife
         void onGameActiveToggle()
         {
             gameActive = !gameActive;
-            if (gameActive) StartCoroutine(GameFunction());
+            if (gameActive)
+            {
+                coroutine = StartCoroutine(GameFunction());
+            }
+            else
+            {
+                StopCoroutine(coroutine);
+            }
+
             renderToggle(ValuesEnum.Prob);
             renderToggle(ValuesEnum.Size);
             text.Render(gameActive, generation, aliveCounter, getSize());
@@ -76,7 +85,6 @@ namespace WayOfLife
             generation = 1;
             grid.OnRestart(getSize(), getProb());
         }
-
 
 
         void UpdateParam(ValuesEnum valueToChange)
