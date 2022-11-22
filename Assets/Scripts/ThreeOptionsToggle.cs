@@ -1,56 +1,29 @@
-
+using System;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
 
-public class ThreeOptionsToggle : MonoBehaviour
+namespace WayOfLife.View
 {
-
-    // Start is called before the first frame update
-    public Options.changableValues valueToChange;
-    private int selectedOption= 0;
-    private GameManager gameManager;
-    private UserPreferences userPreferences;
-
-    void Start()
+    public class ThreeOptionsToggle : MonoBehaviour
     {
-        userPreferences=UserPreferences.Instance;
-        gameManager = GameManager.Instance;
-        gameManager.onGameActiveToggle.AddListener(()=>{gameObject.SetActive(!gameManager.gameActive || valueToChange==Options.changableValues.Speed);});
-    }
+        // Start is called before the first frame update
+        private UnityEvent onClick;
+        
 
-    void Update()
-    {
-        switch (valueToChange)
+        public void Render(ValuesEnum valueToChange, int value, UnityEvent onClick, bool disabled)
         {
-            case Options.changableValues.Prob:
-                selectedOption = userPreferences.prob;
-                break;
-            case Options.changableValues.Size:
-                selectedOption = userPreferences.size;
-                break;
-            case Options.changableValues.Speed:
-                selectedOption = userPreferences.speed;
-                break;
-        }
-        gameObject.GetComponent<TextMeshPro>().text = valueToChange+":"+selectedOption;
-    }
-    
+            this.onClick = onClick;
+            gameObject.GetComponent<TextMeshPro>().text = valueToChange + ":" + value;
+            gameObject.SetActive(!disabled);
 
-    private void OnMouseDown()
-    {
-        switch (valueToChange)
-            {
-                case Options.changableValues.Prob:
-                      gameManager.onProbChanged.Invoke();
-                      break;
-                case Options.changableValues.Size:
-                       gameManager.onSizeChanged.Invoke();
-                    break;
-                case Options.changableValues.Speed:
-                       gameManager.onSpeedChanged.Invoke();
-                    break;
-            }
+        }
+
+
+        private void OnMouseDown()
+        {
+            onClick.Invoke();
+        }
     }
 }
-
-

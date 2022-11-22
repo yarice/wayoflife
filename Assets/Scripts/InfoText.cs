@@ -4,22 +4,26 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class InfoText : MonoBehaviour
-{
-    private GameManager gameManager;
-    private TextMeshPro textComponent;
-    private UserPreferences userPrefs;
-    // Start is called before the first frame update
-    void Start()
-    {
-        userPrefs = UserPreferences.Instance;
-        gameManager=GameManager.Instance;
-        textComponent = GetComponent<TextMeshPro>();
-    }
 
-    // Update is called once per frame
-    void Update()
+namespace WayOfLife.View
+{
+
+
+    public class InfoText : MonoBehaviour
     {
-        textComponent.text =gameManager.gameActive? "Generation: "+gameManager.generation+" | Number of alive cells: "+gameManager.aliveCounter+"/"+userPrefs.size*userPrefs.size:"Press start to begin...";
+
+
+        // Start is called before the first frame update
+
+        public void Render(bool gameActive, int generation, int aliveCounter, int size)
+        {
+            GetComponent<TextMeshPro>().text = gameActive
+                ? "Generation: " + generation + " | Number of alive cells: " + aliveCounter + "/" + size * size
+                : "Press start to begin...";
+        }
     }
 }
+    
+
+
+
