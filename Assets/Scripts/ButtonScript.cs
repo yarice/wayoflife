@@ -15,7 +15,7 @@ namespace WayOfLife.View
     {
 
         private TextMeshPro txt;
-        private UnityEvent onClick;
+        public event Action onClick;
 
         // Start is called before the first frame update
         void Start()
@@ -23,10 +23,9 @@ namespace WayOfLife.View
             txt = gameObject.GetComponent<TextMeshPro>();
         }
 
-        public void Render(string text, UnityEvent onClick, bool disabled)
+        public void Render(string text, bool disabled)
         {
             txt.text = text;
-            this.onClick = onClick;
             gameObject.SetActive(!disabled);
         }
 

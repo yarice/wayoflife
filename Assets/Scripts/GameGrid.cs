@@ -8,10 +8,10 @@ namespace WayOfLife.View
     public class GameGrid : MonoBehaviour
     {
         // Start is called before the first frame update
-        [SerializeField]private GameObject cellPrefab;
+        [SerializeField] private GameObject cellPrefab;
         private GameObject[,] cellsMat;
         private bool[,] shouldAppearInNextGeneration;
-        
+
 
         public void InitGrid(int maximalSize, int prob)
         {
@@ -48,20 +48,18 @@ namespace WayOfLife.View
 
         public void UpdateGridBySize(int newSize, int oldSize)
         {
-            if (newSize < oldSize)
+            if (newSize >= oldSize)
             {
-
-                for (int i = 0; i < oldSize; i++)
+                return;
+            }
+            for (int i = 0; i < oldSize; i++)
+            {
+                for (int j = 0; j < oldSize; j++)
                 {
-                    for (int j = 0; j < oldSize; j++)
+                    if (i >= newSize || j >= newSize) //deactivate cells that are out of bounds
                     {
-                        if (i >= newSize || j >= newSize) //deactivate cells that are out of bounds
-                        {
-                            cellsMat[i, j].SetActive(false);
-                            shouldAppearInNextGeneration[i, j] = false;
-
-
-                        }
+                        cellsMat[i, j].SetActive(false);
+                        shouldAppearInNextGeneration[i, j] = false;
                     }
                 }
             }
@@ -75,51 +73,71 @@ namespace WayOfLife.View
                 for (int j = 0; j < size; j++)
                 {
                     aliveCounter += cellsMat[i, j].activeSelf ? 1 : 0;
-                    int numberOfLiveNeighbors = 0;
-                    for (int k = i - 1; k < i + 2; k++)
-                    {
-                        for (int l = j - 1; l < j + 2; l++)
-                        {
-                            if (k >= 0 && l >= 0 && k < size && l < size && !(k == i && l == j))
-                            {
-                                numberOfLiveNeighbors += cellsMat[k, l].activeSelf ? 1 : 0;
-                            }
-                        }
-                    }
+                    int numberOfAliveNeighbors = countAliveNeighbors(cellsMat,i, j, size);
+                    setValueForNextGen(shouldAppearInNextGeneration,numberOfAliveNeighbors, i, j);
+                }
+            }
 
-                    if ((numberOfLiveNeighbors < 2 || numberOfLiveNeighbors > 3)) //kill an alive cell
-                    {
-                        shouldAppearInNextGeneration[i, j] = false;
-                    }
+            updateNextGen(cellsMat,shouldAppearInNextGeneration,size);
+            return aliveCounter;
+        }
 
-                    if (numberOfLiveNeighbors == 3) //bring a dead cell to life
+        bool isNeighbor(int neighborX,int neighborY, int homeX, int homeY, int size)
+        {
+            return (neighborX >= 0 && neighborY >= 0 && neighborX < size && neighborY < size &&
+                    !(neighborX == homeX && neighborY == homeY));
+        }
+
+        void setValueForNextGen(bool[,] shouldAppearInNextGeneration,int numberOfLiveNeighbors, int i, int j)
+        {
+            if ((numberOfLiveNeighbors < 2 || numberOfLiveNeighbors > 3)) //kill an alive cell
+            {
+                shouldAppearInNextGeneration[i, j] = false;
+            }
+
+            if (numberOfLiveNeighbors == 3) //bring a dead cell to life
+            {
+                shouldAppearInNextGeneration[i, j] = true;
+            }
+        }
+
+        int countAliveNeighbors(GameObject[,] cellsMat, int i, int j, int size)
+        {
+            int numberOfLiveNeighbors = 0;
+            for (int k = i - 1; k < i + 2; k++)
+            {
+                for (int l = j - 1; l < j + 2; l++)
+                {
+                           
+                    if ( isNeighbor(k, l, i, j, size))
                     {
-                        shouldAppearInNextGeneration[i, j] = true;
+                        numberOfLiveNeighbors += cellsMat[k, l].activeSelf ? 1 : 0;
                     }
                 }
             }
 
-            //update the alive and dead cells for next generation
+            return numberOfLiveNeighbors;
+        }
+
+        void updateNextGen(GameObject[,] cellsMat,bool [,] shouldAppearInNextGeneration, int size)
+        {
             for (int i = 0; i < size; i++)
             {
                 for (int j = 0; j < size; j++)
                 {
-                    if (cellsMat[i, j].activeSelf && !shouldAppearInNextGeneration[i, j]) //was enabled and should be disabled
+                    if (cellsMat[i, j].activeSelf &&
+                        !shouldAppearInNextGeneration[i, j]) //was enabled and should be disabled
                     {
                         cellsMat[i, j].SetActive(false);
                     }
 
-                    if (!cellsMat[i, j].activeSelf && shouldAppearInNextGeneration[i, j]) //was disabled and should be enabled
+                    if (!cellsMat[i, j].activeSelf &&
+                        shouldAppearInNextGeneration[i, j]) //was disabled and should be enabled
                     {
                         cellsMat[i, j].SetActive(true);
                     }
                 }
             }
-
-            return aliveCounter;
         }
-
-
-
     }
 }

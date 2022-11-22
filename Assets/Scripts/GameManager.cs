@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
@@ -15,66 +16,48 @@ namespace WayOfLife
         [SerializeField] private ThreeOptionsToggle probToggle;
         [SerializeField] private InfoText text;
         [SerializeField] private GameGrid grid;
-        [SerializeField] [Range(0, 500)] private int speedlarge;
-        [SerializeField] [Range(501, 1000)] private int speedmedium;
-        [SerializeField] [Range(1001, 2000)] private int speedsmall;
-        [SerializeField] [Range(0, 50)] private int sizesmall;
-        [SerializeField] [Range(51, 100)] private int sizemedium;
-        [SerializeField] [Range(101, 150)] private int sizelarge;
-        [SerializeField] [Range(0, 33)] private int probsmall;
-        [SerializeField] [Range(34, 66)] private int probmedium;
-        [SerializeField] [Range(67, 100)] private int problarge;
-        private Options options;
+
+        [SerializeField] private OptionsScriptableObject options;
         private bool gameActive;
-        private UnityEvent onRestartClick;
-        private UnityEvent onGameActiveToggle;
-        private UnityEvent onProbChanged;
-        private UnityEvent onSizeChanged;
-        private UnityEvent onSpeedChanged;
         private int generation = 1;
         private int aliveCounter;
+        private int timeConversionConstant = 1_000;
+        private WaitForSeconds waitForSeconds;
 
         void Start()
         {
-            options = ScriptableObject.CreateInstance<Options>();
-            options.InitInputsQueues(speedlarge, speedmedium, speedsmall, sizelarge, sizemedium, sizesmall, problarge,
-                probmedium, probsmall);
+            options.InitInputsQueues();
             InitEventListeners();
-            restartButton.Render("Restart", onRestartClick,gameActive);
+            restartButton.Render("Restart", gameActive);
             renderToggle(ValuesEnum.Prob);
             renderToggle(ValuesEnum.Size);
             renderToggle(ValuesEnum.Speed);
-            grid.InitGrid(getMaximalSize(), getProb());
+            text.Render(gameActive, generation, aliveCounter, getSize());
+            grid.InitGrid(options.getMaximalSize(), getProb());
         }
 
         void InitEventListeners()
         {
-            onSizeChanged = new UnityEvent();
-            onSpeedChanged = new UnityEvent();
-            onProbChanged = new UnityEvent();
-            onGameActiveToggle = new UnityEvent();
-            onRestartClick = new UnityEvent();
-            onSizeChanged.AddListener(() => UpdateParam(ValuesEnum.Size));
-            onSpeedChanged.AddListener(() => UpdateParam(ValuesEnum.Speed));
-            onProbChanged.AddListener(() => UpdateParam(ValuesEnum.Prob));
-            onGameActiveToggle.AddListener(() =>
+            sizeToggle.onClick += (() => UpdateParam(ValuesEnum.Size));
+            speedToggle.onClick += (() => UpdateParam(ValuesEnum.Speed));
+            probToggle.onClick += (() => UpdateParam(ValuesEnum.Prob));
+            startStopButton.onClick += (() =>
             {
                 gameActive = !gameActive;
                 if (gameActive) StartCoroutine(GameFunction());
                 renderToggle(ValuesEnum.Prob);
                 renderToggle(ValuesEnum.Size);
+                text.Render(gameActive, generation, aliveCounter, getSize());
+                startStopButton.Render(gameActive ? "Stop" : "Start", false);
             });
-            onRestartClick.AddListener(() =>
+            restartButton.onClick += (() =>
             {
                 generation = 1;
-                grid.OnRestart(getSize(),getProb());
+                grid.OnRestart(getSize(), getProb());
             });
         }
 
-         int getMaximalSize()
-        {
-            return sizelarge;
-        }
+
 
         void UpdateParam(ValuesEnum valueToChange)
         {
@@ -82,17 +65,22 @@ namespace WayOfLife
             {
                 int oldSize = options.GetCurrentValue(ValuesEnum.Size);
                 options.GetNextValue(ValuesEnum.Size);
-                grid.UpdateGridBySize(getSize(),oldSize);
+                grid.UpdateGridBySize(getSize(), oldSize);
             }
             else
             {
                 options.GetNextValue(valueToChange);
             }
 
-            if (valueToChange != ValuesEnum.Speed)
+            if (valueToChange == ValuesEnum.Speed)
+            {
+                waitForSeconds = new WaitForSeconds(getSpeed() / timeConversionConstant);
+            }
+
+            else
             {
                 generation = 1;
-                grid.OnRestart(getSize(),getProb());
+                grid.OnRestart(getSize(), getProb());
             }
 
             renderToggle(valueToChange);
@@ -101,10 +89,16 @@ namespace WayOfLife
 
         IEnumerator GameFunction()
         {
+            if (waitForSeconds == null)
+            {
+                waitForSeconds = new WaitForSeconds(getSpeed() / timeConversionConstant);
+            }
+
             while (gameActive)
             {
-                yield return new WaitForSeconds(getSpeed() / 1000);
+                yield return waitForSeconds;
                 aliveCounter = grid.UpdateGridOnGenerationChange(getSize());
+                text.Render(gameActive, generation, aliveCounter, getSize());
                 generation += 1;
             }
         }
@@ -130,26 +124,20 @@ namespace WayOfLife
             {
                 case ValuesEnum.Prob:
                 {
-                    probToggle.Render(ValuesEnum.Prob, getProb(), onProbChanged,gameActive);
+                    probToggle.Render(ValuesEnum.Prob, getProb(), gameActive);
                     break;
                 }
                 case ValuesEnum.Size:
                 {
-                    sizeToggle.Render(ValuesEnum.Size, getSize(), onSizeChanged,gameActive);
+                    sizeToggle.Render(ValuesEnum.Size, getSize(), gameActive);
                     break;
                 }
                 default:
                 {
-                    speedToggle.Render(ValuesEnum.Speed, getSpeed(), onSpeedChanged,false);
+                    speedToggle.Render(ValuesEnum.Speed, getSpeed(), false);
                     break;
                 }
             }
-        }
-
-        void Update()
-        {
-            text.Render(gameActive, generation, aliveCounter, getSize());
-            startStopButton.Render(gameActive ? "Stop" : "Start", onGameActiveToggle,false);
         }
     }
 }
