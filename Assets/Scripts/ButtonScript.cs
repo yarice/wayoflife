@@ -1,9 +1,7 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Events;
+using UnityEngine.EventSystems; 
 
 
 
@@ -11,16 +9,16 @@ namespace WayOfLife.View
 {
 
 
-    public class ButtonScript : MonoBehaviour
+    public class ButtonScript : MonoBehaviour, IPointerClickHandler
     {
 
-        private TextMeshPro txt;
+        [SerializeField] private TextMeshProUGUI txt;
         public event Action onClick;
-
-        // Start is called before the first frame update
-        private void Start()
+        
+        
+        public void OnPointerClick(PointerEventData eventData)
         {
-            txt = gameObject.GetComponent<TextMeshPro>();
+            onClick.Invoke();
         }
 
         public void Render(string text, bool disabled)

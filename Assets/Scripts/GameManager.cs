@@ -31,6 +31,7 @@ namespace WayOfLife
             options.InitInputsQueues();
             InitEventListeners();
             restartButton.Render("Restart", gameActive);
+            startStopButton.Render(gameActive ? "Stop" : "Start", false);
             RenderToggle(ValuesEnum.Prob);
             RenderToggle(ValuesEnum.Size);
             RenderToggle(ValuesEnum.Speed);
@@ -78,6 +79,8 @@ namespace WayOfLife
             RenderToggle(ValuesEnum.Size);
             text.Render(gameActive, generation, aliveCounter, GetSize());
             startStopButton.Render(gameActive ? "Stop" : "Start", false);
+            restartButton.Render("Restart", gameActive);
+
         }
 
         private void OnRestart()

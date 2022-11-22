@@ -11,13 +11,14 @@ namespace WayOfLife.View
 
     public class InfoText : MonoBehaviour
     {
+        [SerializeField] private TextMeshProUGUI txt;
 
 
         // Start is called before the first frame update
 
         public void Render(bool gameActive, int generation, int aliveCounter, int size)
         {
-            GetComponent<TextMeshPro>().text = gameActive
+            txt.text = gameActive
                 ? "Generation: " + generation + " | Number of alive cells: " + aliveCounter + "/" + size * size
                 : "Press start to begin...";
         }
