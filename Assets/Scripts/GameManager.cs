@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 using WayOfLife.Model;
@@ -38,23 +39,42 @@ namespace WayOfLife
 
         void InitEventListeners()
         {
-            sizeToggle.onClick += (() => UpdateParam(ValuesEnum.Size));
-            speedToggle.onClick += (() => UpdateParam(ValuesEnum.Speed));
-            probToggle.onClick += (() => UpdateParam(ValuesEnum.Prob));
-            startStopButton.onClick += (() =>
-            {
-                gameActive = !gameActive;
-                if (gameActive) StartCoroutine(GameFunction());
-                renderToggle(ValuesEnum.Prob);
-                renderToggle(ValuesEnum.Size);
-                text.Render(gameActive, generation, aliveCounter, getSize());
-                startStopButton.Render(gameActive ? "Stop" : "Start", false);
-            });
-            restartButton.onClick += (() =>
-            {
-                generation = 1;
-                grid.OnRestart(getSize(), getProb());
-            });
+            sizeToggle.onClick += onSizeChange;
+            speedToggle.onClick += onSpeedChange;
+            probToggle.onClick += onProbChange;
+            startStopButton.onClick += onGameActiveToggle;
+            restartButton.onClick += onRestart;
+        }
+
+        void onSizeChange()
+        {
+            UpdateParam(ValuesEnum.Size);
+        }
+
+        void onSpeedChange()
+        {
+            UpdateParam(ValuesEnum.Speed);
+        }
+
+        void onProbChange()
+        {
+            UpdateParam(ValuesEnum.Prob);
+        }
+
+        void onGameActiveToggle()
+        {
+            gameActive = !gameActive;
+            if (gameActive) StartCoroutine(GameFunction());
+            renderToggle(ValuesEnum.Prob);
+            renderToggle(ValuesEnum.Size);
+            text.Render(gameActive, generation, aliveCounter, getSize());
+            startStopButton.Render(gameActive ? "Stop" : "Start", false);
+        }
+
+        void onRestart()
+        {
+            generation = 1;
+            grid.OnRestart(getSize(), getProb());
         }
 
 
@@ -138,6 +158,15 @@ namespace WayOfLife
                     break;
                 }
             }
+        }
+
+        private void OnDestroy()
+        {
+            sizeToggle.onClick -= onSizeChange;
+            speedToggle.onClick -= onSpeedChange;
+            probToggle.onClick -= onProbChange;
+            startStopButton.onClick -= onGameActiveToggle;
+            restartButton.onClick -= onRestart;
         }
     }
 }
