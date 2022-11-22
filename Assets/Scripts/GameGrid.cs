@@ -73,22 +73,22 @@ namespace WayOfLife.View
                 for (int j = 0; j < size; j++)
                 {
                     aliveCounter += cellsMat[i, j].activeSelf ? 1 : 0;
-                    int numberOfAliveNeighbors = countAliveNeighbors(cellsMat,i, j, size);
-                    setValueForNextGen(shouldAppearInNextGeneration,numberOfAliveNeighbors, i, j);
+                    int numberOfAliveNeighbors = CountAliveNeighbors(cellsMat,i, j, size);
+                    SetValueForNextGen(shouldAppearInNextGeneration,numberOfAliveNeighbors, i, j);
                 }
             }
 
-            updateNextGen(cellsMat,shouldAppearInNextGeneration,size);
+            UpdateNextGen(cellsMat,shouldAppearInNextGeneration,size);
             return aliveCounter;
         }
 
-        bool isNeighbor(int neighborX,int neighborY, int homeX, int homeY, int size)
+        private bool IsNeighbor(int neighborX,int neighborY, int homeX, int homeY, int size)
         {
             return (neighborX >= 0 && neighborY >= 0 && neighborX < size && neighborY < size &&
                     !(neighborX == homeX && neighborY == homeY));
         }
 
-        void setValueForNextGen(bool[,] shouldAppearInNextGeneration,int numberOfLiveNeighbors, int i, int j)
+        private void SetValueForNextGen(bool[,] shouldAppearInNextGeneration,int numberOfLiveNeighbors, int i, int j)
         {
             if ((numberOfLiveNeighbors < 2 || numberOfLiveNeighbors > 3)) //kill an alive cell
             {
@@ -101,7 +101,7 @@ namespace WayOfLife.View
             }
         }
 
-        int countAliveNeighbors(GameObject[,] cellsMat, int i, int j, int size)
+        private int CountAliveNeighbors(GameObject[,] cellsMat, int i, int j, int size)
         {
             int numberOfLiveNeighbors = 0;
             for (int k = i - 1; k < i + 2; k++)
@@ -109,7 +109,7 @@ namespace WayOfLife.View
                 for (int l = j - 1; l < j + 2; l++)
                 {
                            
-                    if ( isNeighbor(k, l, i, j, size))
+                    if ( IsNeighbor(k, l, i, j, size))
                     {
                         numberOfLiveNeighbors += cellsMat[k, l].activeSelf ? 1 : 0;
                     }
@@ -119,7 +119,7 @@ namespace WayOfLife.View
             return numberOfLiveNeighbors;
         }
 
-        void updateNextGen(GameObject[,] cellsMat,bool [,] shouldAppearInNextGeneration, int size)
+        private void UpdateNextGen(GameObject[,] cellsMat,bool [,] shouldAppearInNextGeneration, int size)
         {
             for (int i = 0; i < size; i++)
             {

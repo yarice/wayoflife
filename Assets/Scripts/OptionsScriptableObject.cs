@@ -36,13 +36,13 @@ namespace WayOfLife.Model
             probs.Enqueue(probmedium);
             probs.Enqueue(probsmall);
         }
-        public int getMaximalSize()
+        public int GetMaximalSize()
         {
             return sizelarge;
         }
         
 
-        private Queue<int> getQueue(ValuesEnum value)
+        private Queue<int> GetQueue(ValuesEnum value)
         {
             switch (value)
             {
@@ -58,12 +58,12 @@ namespace WayOfLife.Model
 
         public int GetCurrentValue(ValuesEnum value)
         {
-            return getQueue(value).Peek();
+            return GetQueue(value).Peek();
         }
 
         public int GetNextValue(ValuesEnum value)
         {
-            Queue<int> queue = getQueue(value);
+            Queue<int> queue = GetQueue(value);
             int temp = queue.Dequeue();
             queue.Enqueue(temp);
             return temp;
